@@ -1,0 +1,68 @@
+name: ha_hub
+version: 1.0.0+1
+publish_to: none
+description: An imitation Nest Hub for Home Assistant.
+environment:
+  sdk: '>=2.13.0 <3.0.0'
+
+dependencies:
+  #  cupertino_icons: ^1.0.2
+  dartkt:
+    #  path: ../dartkt
+    git:
+      url: git://github.com/timtimmahh/dartkt.git
+  get: ^4.3.8
+  intl: ^0.17.0
+  hassio_api:
+    #  path: ../hassio_api
+    git:
+      url: git://github.com/timtimmahh/hassio_api.git
+  font_awesome_flutter: ^9.2.0
+  #  font_awesome_flutter: ^9.1.0
+  cached_network_image: ^3.1.0
+  another_flushbar: ^1.10.24
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^1.0.0
+  lints: 1.0.1
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Roboto-BlackItalic.ttf
+          weight: 900
+          style: italic
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Roboto-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Roboto-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Roboto-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Roboto-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Roboto-ThinItalic.ttf
+          weight: 100
+          style: italic
+  uses-material-design: true
+
