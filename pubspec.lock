@@ -95,9 +95,11 @@ packages:
   dartkt:
     dependency: "direct main"
     description:
-      path: "../dartkt"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "632576d4c786e21250e85b13745a176c660f48a8"
+      url: "git://github.com/timtimmahh/dartkt.git"
+    source: git
     version: "1.0.6"
   dio:
     dependency: transitive
@@ -175,9 +177,11 @@ packages:
   hassio_api:
     dependency: "direct main"
     description:
-      path: "../hassio_api"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: bda4e584b4bbd8748e9e102113f733170e04a6ff
+      url: "git://github.com/timtimmahh/hassio_api.git"
+    source: git
     version: "1.0.0+1"
   http:
     dependency: transitive
@@ -322,9 +326,11 @@ packages:
   retrofit:
     dependency: transitive
     description:
-      path: "../retrofit.dart/annotation"
-      relative: true
-    source: path
+      path: annotation
+      ref: HEAD
+      resolved-ref: "9ada3772ff9e7095916545a0a41bdd50772216b2"
+      url: "git://github.com/timtimmahh/retrofit.dart"
+    source: git
     version: "2.2.0"
   rxdart:
     dependency: transitive
