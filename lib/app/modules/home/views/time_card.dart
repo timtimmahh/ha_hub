@@ -23,9 +23,11 @@ class TimeCard extends GetView<HomeController> {
                         child: Text(
                             Get.find<DateFormat>(tag: 'timeFormat')
                                 .format(dateTime),
-                            style: Get.textTheme.headline2!.copyWith(
+                            style: Get.textTheme
+                                .headline2! /*.copyWith(
                                 // color: Colors.black87,
                                 fontWeight: FontWeight.normal,
-                                letterSpacing: -1.5)))
+                                letterSpacing: -1.5)*/
+                            ))
                   ])) /*)*/;
 }

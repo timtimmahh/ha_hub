@@ -28,7 +28,7 @@ void main() {
         typography: customTypography,
         // textTheme: TextTheme(headline2: TextStyle),
         cardTheme: CardTheme(
-          color: Colors.white,
+          // color: Colors.white,
           elevation: 20.0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
@@ -43,7 +43,7 @@ void main() {
           backgroundColor: Colors.black,
           typography: customTypography,
           cardTheme: CardTheme(
-              color: Colors.black,
+              color: Color(0xFF121212),
               elevation: 20.0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0)))),

@@ -6,17 +6,22 @@ class WeatherProvider extends GetConnect {
 
   @override
   void onInit() {
-    httpClient.baseUrl = 'https://api.allorigins.win/raw';
+    httpClient.baseUrl =
+        'http://192.168.1.226:8080/http://api.openweathermap.org/data/2.5';
   }
 
   Future<AllWeather> getWeatherData(double lat, double lon,
           {List<String>? excludes = const ['minutely'],
           String units = 'imperial',
           String lang = 'en'}) async =>
-      await get('',
+      await get('/onecall',
               query: {
-                'url':
-                    'https://api.openweathermap.org/data/2.5/onecall?lat=${lat.toPrecision(4)}&lon=${lon.toPrecision(4)}&appid=$_appId&units=$units&lang=$lang${excludes == null ? '' : '&exclude=${excludes.join(',')}'}'
+                'lat': lat.toPrecision(4).toString(),
+                'lon': lon.toPrecision(4).toString(),
+                'appid': _appId,
+                'units': units,
+                'lang': lang,
+                if (excludes != null) 'exclude': excludes.join(',')
               },
               decoder: (json) => AllWeather.fromJson(json))
           .then((value) => value.body!);

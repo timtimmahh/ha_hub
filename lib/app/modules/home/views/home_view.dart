@@ -15,15 +15,17 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: GetXFutureView<HomeController, AllWeather?>(
-            rxFuture: controller.allWeatherFuture,
-            builder: (weather) => Container(
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(flex: 3, child: TimeCard()),
-                      Expanded(flex: 4, child: WeatherCard())
-                    ]))));
+        body: Container(
+            padding: EdgeInsets.all(24.0),
+            child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(flex: 3, child: TimeCard()),
+                  Expanded(
+                      flex: 4,
+                      child: GetXFutureView<HomeController, AllWeather?>(
+                          rxFuture: controller.allWeatherFuture,
+                          builder: (weather) => WeatherCard()))
+                ])));
   }
 }
