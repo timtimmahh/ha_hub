@@ -7,7 +7,7 @@ class WeatherProvider extends GetConnect {
   @override
   void onInit() {
     httpClient.baseUrl =
-        'http://192.168.1.226:8080/http://api.openweathermap.org/data/2.5';
+        'https://cors-anywhere-ha-hub.herokuapp.com/https://api.openweathermap.org/data/2.5';
   }
 
   Future<AllWeather> getWeatherData(double lat, double lon,

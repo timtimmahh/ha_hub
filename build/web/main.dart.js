@@ -56823,7 +56823,7 @@ r.l(0,"description",s.e)
 r.l(0,"tags",s.f)
 return r}}
 R.mL.prototype={
-kl(){this.gIL().b="http://192.168.1.226:8080/http://api.openweathermap.org/data/2.5"},
+kl(){this.gIL().b="https://cors-anywhere-ha-hub.herokuapp.com/https://api.openweathermap.org/data/2.5"},
 mA(a,b){return this.LE(a,b)},
 LE(a,b){var s=0,r=P.V(t.n7),q,p=this,o,n
 var $async$mA=P.Q(function(c,d){if(c===1)return P.S(d,r)
