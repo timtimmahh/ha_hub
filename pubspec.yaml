@@ -10,24 +10,24 @@ dependencies:
   dartkt:
     #  path: ../dartkt
     git:
-      url: git://github.com/timtimmahh/dartkt.git
-  get: ^4.3.8
+      url: git@github.com:timtimmahh/dartkt.git
+  get: ^4.6.1
   intl: ^0.17.0
   hassio_api:
     #  path: ../hassio_api
     git:
-      url: git://github.com/timtimmahh/hassio_api.git
-  font_awesome_flutter: ^9.2.0
+      url: git@github.com:timtimmahh/hassio_api.git
+  font_awesome_flutter: ^10.1.0
   #  font_awesome_flutter: ^9.1.0
-  cached_network_image: ^3.1.0
-  another_flushbar: ^1.10.24
-  shared_preferences: ^2.0.9
-  googleapis: ^7.0.0
+  cached_network_image: ^3.2.0
+  another_flushbar: ^1.10.28
+  shared_preferences: ^2.0.13
+  googleapis: ^8.1.0
   googleapis_auth: ^1.3.0
-  google_sign_in: ^5.2.1
+  google_sign_in: ^5.2.4
   extension_google_sign_in_as_googleapis_auth: ^2.0.4
   web_socket_channel: ^2.1.0
-  shelf: ^1.2.0
+  shelf: ^1.3.0
   shelf_router: ^1.1.2
   shelf_static: ^1.1.0
   shelf_web_socket: ^1.0.1
@@ -35,7 +35,7 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  flutter_lints: ^1.0.0
+  flutter_lints: ^1.0.4
   lints: 1.0.1
   flutter_test:
     sdk: flutter
