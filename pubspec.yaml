@@ -21,6 +21,16 @@ dependencies:
   #  font_awesome_flutter: ^9.1.0
   cached_network_image: ^3.1.0
   another_flushbar: ^1.10.24
+  shared_preferences: ^2.0.9
+  googleapis: ^7.0.0
+  googleapis_auth: ^1.3.0
+  google_sign_in: ^5.2.1
+  extension_google_sign_in_as_googleapis_auth: ^2.0.4
+  web_socket_channel: ^2.1.0
+  shelf: ^1.2.0
+  shelf_router: ^1.1.2
+  shelf_static: ^1.1.0
+  shelf_web_socket: ^1.0.1
   flutter:
     sdk: flutter
 

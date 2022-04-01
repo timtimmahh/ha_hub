@@ -36,17 +36,15 @@ void main() {
         ),
       ),
       darkTheme: ThemeData(
-          colorScheme:
-              ColorScheme.dark(surface: Colors.black, background: Colors.black),
+          colorScheme: ColorScheme.dark(surface: Colors.black, background: Colors.black),
           fontFamily: 'Roboto',
           scaffoldBackgroundColor: Colors.black,
           backgroundColor: Colors.black,
           typography: customTypography,
           cardTheme: CardTheme(
-              color: Color(0xFF121212),
+              color: Color(0xFF101010),
               elevation: 20.0,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)))),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)))),
       themeMode: ThemeMode.light,
     ),
   );

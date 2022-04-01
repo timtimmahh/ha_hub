@@ -4,9 +4,13 @@ import 'dart:convert';
 import 'package:dartkt/dartkt.dart' hide Config;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ha_hub/app/modules/home/data/alarm_models.dart';
 import 'package:ha_hub/app/modules/home/data/weather_model.dart';
 import 'package:ha_hub/app/modules/home/providers/weather_provider.dart';
 import 'package:hassio_api/hassio_api.dart' hide State;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_web_socket/shelf_web_socket.dart';
 
 class SunState implements Timer, DateTime {
   DateTime _stateTime;
@@ -107,15 +111,23 @@ class HomeController extends GetxController {
   SunState? _sunriseState;
   SunState? _sunsetState;
   late final Timer _weatherTimer;
+  late SharedPreferences preferences;
+  late final alarms = List<Alarm>.empty().obs;
 
   @override
   void onInit() {
     super.onInit();
+    shelf_io.serve(webSocketHandler((webSocket) {
+      webSocket.stream.listen((message) {
+        print('WebSocket message: $message');
+      });
+    }), 'localhost', 8123).then((server) {
+      print('Serving at ws://${server.address.host}:${server.port}');
+    });
     asyncInit().then((value) {
       allWeatherFuture.value = Future.value(value);
       _weatherTimer = Timer.periodic(Duration(minutes: 10), (timer) async {
-        _allWeather.value = await _weatherProvider.getWeatherData(
-            _hassIOConfig.latitude, _hassIOConfig.longitude);
+        _allWeather.value = await _weatherProvider.getWeatherData(_hassIOConfig.latitude, _hassIOConfig.longitude);
         print('Updated weather data');
         _themeToggleCallback();
       });
@@ -136,19 +148,21 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
+  List<Alarm> get _alarms {
+    return (jsonDecode(preferences.getString('alarms') ?? '[]') as List)
+        .mapL((it) => Alarm.fromJson(it))
+        .sortByDescending((first, second) => first.nextAlarmTime.compareTo(second.nextAlarmTime));
+  }
+
   _makeSunriseTimer() {
     print('Making sunrise timer');
     var now = DateTime.now();
     var sunriseDate = _allWeather.value.daily!
-        .map<DateTime?>(
-            (e) => e.sunrise.isUtc ? e.sunrise.toLocal() : e.sunrise)
-        .firstWhere((sunrise) => sunrise?.isAfter(now) ?? false,
-            orElse: () => null);
+        .map<DateTime?>((e) => e.sunrise.isUtc ? e.sunrise.toLocal() : e.sunrise)
+        .firstWhere((sunrise) => sunrise?.isAfter(now) ?? false, orElse: () => null);
     if (sunriseDate != null && sunriseDate.isAfter(now)) {
-      print(
-          'Found next sunrise=${sunriseDate.toIso8601String()}, current=${_sunriseState?.toIso8601String()}');
-      if (_sunriseState != null &&
-          sunriseDate.isAtSameMomentAs(_sunriseState!)) {
+      print('Found next sunrise=${sunriseDate.toIso8601String()}, current=${_sunriseState?.toIso8601String()}');
+      if (_sunriseState != null && sunriseDate.isAtSameMomentAs(_sunriseState!)) {
         print('No change in sunrise, not creating timer.');
         return;
       }
@@ -179,11 +193,9 @@ class HomeController extends GetxController {
     var now = DateTime.now();
     var sunsetDate = _allWeather.value.daily!
         .map<DateTime?>((e) => e.sunset.isUtc ? e.sunset.toLocal() : e.sunset)
-        .firstWhere((sunset) => sunset?.isAfter(now) ?? false,
-            orElse: () => null);
+        .firstWhere((sunset) => sunset?.isAfter(now) ?? false, orElse: () => null);
     if (sunsetDate != null && sunsetDate.isAfter(now)) {
-      print(
-          'Found next sunset=${sunsetDate.toIso8601String()}, current=${_sunsetState?.toIso8601String()}');
+      print('Found next sunset=${sunsetDate.toIso8601String()}, current=${_sunsetState?.toIso8601String()}');
       if (_sunsetState != null && sunsetDate.isAtSameMomentAs(_sunsetState!)) {
         print('No change in sunset, not creating timer.');
         return;
@@ -216,16 +228,15 @@ class HomeController extends GetxController {
   }
 
   Future<AllWeather> asyncInit() async {
+    preferences = await SharedPreferences.getInstance();
+    alarms.value = _alarms;
     Completer<AllWeather> completer = Completer<AllWeather>();
     _hassIO.webSocket.getConfig((data) async {
       if (data.success) {
         _hassIOConfig = data.result!;
-        _allWeather = (await _weatherProvider.getWeatherData(
-                _hassIOConfig.latitude, _hassIOConfig.longitude))
-            .obs;
+        _allWeather = (await _weatherProvider.getWeatherData(_hassIOConfig.latitude, _hassIOConfig.longitude)).obs;
         var _now = DateTime.now();
-        if (_allWeather.value.current!.sunset.isBefore(_now) ||
-            _allWeather.value.current!.sunrise.isAfter(_now)) {
+        if (_allWeather.value.current!.sunset.isBefore(_now) || _allWeather.value.current!.sunrise.isAfter(_now)) {
           Get.changeThemeMode(ThemeMode.dark);
         } else if (_allWeather.value.current!.sunrise.isBefore(_now)) {
           Get.changeThemeMode(ThemeMode.light);
@@ -236,21 +247,19 @@ class HomeController extends GetxController {
     // _hassIO.webSocket.subscribeTimeChanges((time) {
     //   currentTime.value = DateTime.parse(time);
     // });
+    var state = await _hassIO.restClient.getEntityState('calendar.timtimmahh_gmail_com');
+    print(JsonEncoder.withIndent('  ').convert(state));
     _hassIO.webSocket.getStates((states) {
       print('Got states');
       print(JsonEncoder.withIndent('  ').convert(states
-              ?.where((element) =>
-                  element.entityId == 'weather.home' ||
-                  element.entityId == 'weather.home_hourly')
+              ?.where((element) => element.entityId == 'weather.home' || element.entityId == 'weather.home_hourly')
               .toList() ??
           List<State>.empty()));
     });
-    _hassIO.webSocket.subscribeStateChanges('weather.home',
-        (oldState, newState) {
+    _hassIO.webSocket.subscribeStateChanges('weather.home', (oldState, newState) {
       print('Weather Home');
     });
-    _hassIO.webSocket.subscribeStateChanges('weather.home_hourly',
-        (oldState, newState) {
+    _hassIO.webSocket.subscribeStateChanges('weather.home_hourly', (oldState, newState) {
       print('Weather Home Hourly');
     });
     return completer.future;
