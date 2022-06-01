@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:ha_hub/app/modules/home/providers/weather_provider.dart';
-import 'package:ha_hub/main.dart';
+import 'package:ha_hub/constants.dart';
 import 'package:hassio_api/hassio_api.dart';
 import 'package:intl/intl.dart';
 

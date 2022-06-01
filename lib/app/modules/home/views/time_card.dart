@@ -20,7 +20,7 @@ class TimeCard extends GetView<HomeController> {
                       .asText(style: Get.textTheme.headline2!)
                       .contain(padding: EdgeInsets.only(top: 4.0))
                 ].linear(crossAxisAlignment: CrossAxisAlignment.start)).expanded(flex: 2),
-        AlarmsCard().expanded(flex: 4),
+        // AlarmsCard().expanded(flex: 4),
         Icons.alarm_add.button(onPressed: () {}, iconSize: 36.0).contain().expanded(flex: 1)
       ].linear();
 }

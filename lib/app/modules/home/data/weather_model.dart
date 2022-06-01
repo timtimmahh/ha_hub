@@ -1,3 +1,76 @@
+import 'package:hassio_api/api/rest/rest_models.dart';
+import 'package:dartkt/dartkt.dart';
+
+class SunEntityState extends State {
+  DateTime? nextDawn;
+  DateTime? nextDusk;
+  DateTime? nextMidnight;
+  DateTime? nextNoon;
+  DateTime? nextRising;
+  DateTime? nextSetting;
+  double? elevation;
+  double? azimuth;
+  bool? rising;
+
+  SunEntityState(Map<String, dynamic> attributes, String entityId, String lastChanged, String state)
+      : nextDawn = Date.tryParse(attributes['next_dawn']),
+        nextDusk = Date.tryParse(attributes['nextDusk']),
+        nextNoon = Date.tryParse(attributes['next_noon']),
+        nextRising = Date.tryParse(attributes['next_rising']),
+        nextSetting = Date.tryParse(attributes['next_setting']),
+        elevation = attributes.getAs<double>('elevation'),
+        azimuth = attributes.getAs<double>('azimuth'),
+        rising = attributes['rising'],
+        super(attributes, entityId, lastChanged, state);
+
+  SunEntityState.fromJson(Map<String, dynamic> json)
+      : this(json['attributes'], json['entity_id'], json['last_changed'], json['state']);
+}
+
+class ForecastItem {
+  String? condition;
+  double? precipitation;
+  int? temperature;
+  int? templow;
+  DateTime? datetime;
+  double? windBearing;
+  double? windSpeed;
+
+  ForecastItem(Map<String, dynamic> json)
+      : condition = json.getAs<String>('condition'),
+        precipitation = json.getAs<double>('precipitation'),
+        temperature = json.getAs<int>('temperature'),
+        templow = json.getAs<int>('templow'),
+        datetime = Date.tryParse(json['datetime']),
+        windBearing = json.getAs<double>('wind_bearing'),
+        windSpeed = json.getAs<double>('wind_speed');
+}
+
+class WeatherState extends State {
+  double? temperature;
+  double? humidity;
+  double? pressure;
+  double? windBearing;
+  double? windSpeed;
+  List<ForecastItem>? forecast;
+  String? attribution;
+  String? friendlyName;
+
+  WeatherState(Map<String, dynamic> attributes, String entityId, String lastChanged, String state)
+      : temperature = attributes.getAs<double>('temperature'),
+        humidity = attributes.getAs<double>('humidity'),
+        pressure = attributes.getAs<double>('pressure'),
+        windBearing = attributes.getAs<double>('wind_bearing'),
+        windSpeed = attributes.getAs<double>('wind_speed'),
+        forecast = attributes.getAs<List<dynamic>>('forecast')?.mapL((e) => ForecastItem(e)),
+        attribution = attributes.getAs<String>('attribution'),
+        friendlyName = attributes.getAs<String>('friendly_name'),
+        super(attributes, entityId, lastChanged, state);
+
+  WeatherState.fromJson(Map<String, dynamic> json)
+      : this(json['attributes'], json['entity_id'], json['last_changed'], json['state']);
+}
+
 class AllWeather {
   double lat;
   double lon;
@@ -26,21 +99,11 @@ class AllWeather {
             lon: json['lon'],
             timezone: json['timezone'],
             timezoneOffset: json['timezone_offset'],
-            current: json['current'] != null
-                ? CurrentWeather.fromJson(json['current'])
-                : null,
-            minutely: (json['minutely'] as List<dynamic>?)
-                ?.map((e) => MinutelyWeather.fromJson(e))
-                .toList(),
-            hourly: (json['hourly'] as List<dynamic>?)
-                ?.map((e) => HourlyWeather.fromJson(e))
-                .toList(),
-            daily: (json['daily'] as List<dynamic>?)
-                ?.map((e) => DailyWeather.fromJson(e))
-                .toList(),
-            alerts: (json['alerts'] as List<dynamic>?)
-                ?.map((e) => WeatherAlerts.fromJson(e))
-                .toList());
+            current: json['current'] != null ? CurrentWeather.fromJson(json['current']) : null,
+            minutely: (json['minutely'] as List<dynamic>?)?.map((e) => MinutelyWeather.fromJson(e)).toList(),
+            hourly: (json['hourly'] as List<dynamic>?)?.map((e) => HourlyWeather.fromJson(e)).toList(),
+            daily: (json['daily'] as List<dynamic>?)?.map((e) => DailyWeather.fromJson(e)).toList(),
+            alerts: (json['alerts'] as List<dynamic>?)?.map((e) => WeatherAlerts.fromJson(e)).toList());
 
   Map<String, dynamic> toJson() => {
         'lat': lat,
@@ -48,8 +111,7 @@ class AllWeather {
         'timezone': timezone,
         'timezone_offset': timezoneOffset,
         if (current != null) 'current': current!.toJson(),
-        if (minutely != null)
-          'minutely': minutely!.map((v) => v.toJson()).toList(),
+        if (minutely != null) 'minutely': minutely!.map((v) => v.toJson()).toList(),
         if (hourly != null) 'hourly': hourly!.map((v) => v.toJson()).toList(),
         if (daily != null) 'daily': daily!.map((v) => v.toJson()).toList(),
         if (alerts != null) 'alerts': alerts!.map((v) => v.toJson()).toList(),
@@ -97,14 +159,8 @@ class CurrentWeather {
   CurrentWeather.fromJson(Map<String, dynamic> json)
       : this(
             dt: json['dt'],
-            sunrise: DateTime.fromMillisecondsSinceEpoch(
-                    (json['sunrise'] as int) * 1000,
-                    isUtc: true)
-                .toLocal(),
-            sunset: DateTime.fromMillisecondsSinceEpoch(
-                    (json['sunset'] as int) * 1000,
-                    isUtc: true)
-                .toLocal(),
+            sunrise: DateTime.fromMillisecondsSinceEpoch((json['sunrise'] as int) * 1000, isUtc: true).toLocal(),
+            sunset: DateTime.fromMillisecondsSinceEpoch((json['sunset'] as int) * 1000, isUtc: true).toLocal(),
             temp: json['temp'],
             feelsLike: json['feels_like'],
             pressure: json['pressure'],
@@ -119,9 +175,7 @@ class CurrentWeather {
             rain: json['rain'] != null ? Volume.fromJson(json['rain']) : null,
             snow: json['snow'] != null ? Volume.fromJson(json['snow']) : null,
             weather: json['weather'] != null
-                ? (json['weather'] as List<dynamic>)
-                    .map((e) => Weather.fromJson(e))
-                    .toList()
+                ? (json['weather'] as List<dynamic>).map((e) => Weather.fromJson(e)).toList()
                 : null);
 
   Map<String, dynamic> toJson() => {
@@ -139,8 +193,7 @@ class CurrentWeather {
         'wind_speed': windSpeed,
         if (windGust != null) 'wind_gust': windGust,
         'wind_deg': windDeg,
-        if (weather != null)
-          'weather': weather!.map((v) => v.toJson()).toList(),
+        if (weather != null) 'weather': weather!.map((v) => v.toJson()).toList(),
         if (rain != null) 'rain': rain!.toJson(),
         if (snow != null) 'snow': snow!.toJson()
       };
@@ -210,22 +263,16 @@ class Weather {
   String description;
   String icon;
 
-  Weather(
-      {required this.id,
-      required this.main,
-      required this.description,
-      required this.icon});
+  Weather({required this.id, required this.main, required this.description, required this.icon});
 
   Weather.fromJson(Map<String, dynamic> json)
       : this(
             id: json['id'],
             main: json['main'],
             description: json['description'],
-            icon:
-                '${weatherCodeMappings[json['id']]}${(json['icon'] as String).endsWith('d') ? 'd' : 'n'}');
+            icon: '${weatherCodeMappings[json['id']]}${(json['icon'] as String).endsWith('d') ? 'd' : 'n'}');
 
-  Map<String, dynamic> toJson() =>
-      {'id': id, 'main': main, 'description': description, 'icon': icon};
+  Map<String, dynamic> toJson() => {'id': id, 'main': main, 'description': description, 'icon': icon};
 }
 
 class Volume {
@@ -244,8 +291,7 @@ class MinutelyWeather {
 
   MinutelyWeather({required this.dt, required this.precipitation});
 
-  MinutelyWeather.fromJson(Map<String, dynamic> json)
-      : this(dt: json['dt'], precipitation: json['precipitation']);
+  MinutelyWeather.fromJson(Map<String, dynamic> json) : this(dt: json['dt'], precipitation: json['precipitation']);
 
   Map<String, dynamic> toJson() => {
         'dt': dt,
@@ -303,9 +349,7 @@ class HourlyWeather {
             windSpeed: json['wind_speed'],
             windDeg: json['wind_deg'],
             windGust: json['wind_gust'],
-            weather: (json['weather'] as List<dynamic>?)
-                ?.map((e) => Weather.fromJson(e))
-                .toList(),
+            weather: (json['weather'] as List<dynamic>?)?.map((e) => Weather.fromJson(e)).toList(),
             pop: json['pop'],
             rain: json['rain'] != null ? Volume.fromJson(json['rain']) : null,
             snow: json['snow'] != null ? Volume.fromJson(json['snow']) : null);
@@ -323,8 +367,7 @@ class HourlyWeather {
         'wind_speed': windSpeed,
         'wind_deg': windDeg,
         if (windGust != null) 'wind_gust': windGust,
-        if (weather != null)
-          'weather': weather!.map((v) => v.toJson()).toList(),
+        if (weather != null) 'weather': weather!.map((v) => v.toJson()).toList(),
         'pop': pop,
         if (rain != null) 'rain': rain!.toJson(),
         if (snow != null) 'snow': snow!.toJson()
@@ -378,14 +421,8 @@ class DailyWeather {
   DailyWeather.fromJson(Map<String, dynamic> json)
       : this(
           dt: json['dt'],
-          sunrise: DateTime.fromMillisecondsSinceEpoch(
-                  (json['sunrise'] as int) * 1000,
-                  isUtc: true)
-              .toLocal(),
-          sunset: DateTime.fromMillisecondsSinceEpoch(
-                  (json['sunset'] as int) * 1000,
-                  isUtc: true)
-              .toLocal(),
+          sunrise: DateTime.fromMillisecondsSinceEpoch((json['sunrise'] as int) * 1000, isUtc: true).toLocal(),
+          sunset: DateTime.fromMillisecondsSinceEpoch((json['sunset'] as int) * 1000, isUtc: true).toLocal(),
           moonrise: json['moonrise'],
           moonset: json['moonset'],
           moonPhase: json['moon_phase'],
@@ -397,9 +434,7 @@ class DailyWeather {
           windSpeed: json['wind_speed'],
           windGust: json['wind_gust'],
           windDeg: json['wind_deg'],
-          weather: (json['weather'] as List<dynamic>?)
-              ?.map((e) => Weather.fromJson(e))
-              .toList(),
+          weather: (json['weather'] as List<dynamic>?)?.map((e) => Weather.fromJson(e)).toList(),
           clouds: json['clouds'],
           pop: json['pop'],
           rain: json['rain'],
@@ -422,8 +457,7 @@ class DailyWeather {
         'wind_speed': windSpeed,
         if (windGust != null) 'wind_gust': windGust,
         'wind_deg': windDeg,
-        if (weather != null)
-          'weather': weather!.map((v) => v.toJson()).toList(),
+        if (weather != null) 'weather': weather!.map((v) => v.toJson()).toList(),
         'clouds': clouds,
         'pop': pop,
         if (rain != null) 'rain': rain,
@@ -474,11 +508,7 @@ class FeelsLike {
   double eve;
   double morn;
 
-  FeelsLike(
-      {required this.day,
-      required this.night,
-      required this.eve,
-      required this.morn});
+  FeelsLike({required this.day, required this.night, required this.eve, required this.morn});
 
   FeelsLike.fromJson(Map<String, dynamic> json)
       : this(

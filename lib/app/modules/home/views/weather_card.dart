@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 class WeatherCard extends GetView<HomeController> {
   @override
-  Widget build(BuildContext context) => ObxValue<Rx<AllWeather>>(
+  Widget build(BuildContext context) => Text('');/*ObxValue<Rx<AllWeather>>(
       (weather) => [
             <Widget>[
               'https://www.weatherbit.io/static/img/icons/${weather.value.current!.weather!.first.icon}.png'
@@ -37,8 +37,8 @@ class WeatherCard extends GetView<HomeController> {
             HourlyWeatherView(
               weather: weather.value,
             )
-          ].column(mainAxisSize: MainAxisSize.min).contain(padding: EdgeInsets.all(8.0)) /*)*/,
-      controller.allWeather);
+          ].column(mainAxisSize: MainAxisSize.min).contain(padding: EdgeInsets.all(8.0)) *//*)*//*,
+      controller.allWeather);*/
 }
 
 class HourlyWeatherView extends GetView<HomeController> {

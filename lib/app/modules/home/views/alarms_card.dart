@@ -8,10 +8,10 @@ import 'package:ha_hub/exts/widget_exts.dart';
 class AlarmsCard extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) => ObxValue<RxList<Alarm>>(
-      (alarms) => ListTile(
+      (alarms) => ListView.builder(itemBuilder: (context, index) => ListTile(
             leading: Icons.alarm.icon(),
-            title: alarms.first.nextAlarmTimeString.asText(),
+            title: alarms[index].nextAlarmTimeString.asText(),
             onTap: () {},
-          ).contain(padding: EdgeInsets.only(top: 8.0)),
+          ).contain(padding: EdgeInsets.only(top: 8.0))),
       controller.alarms);
 }

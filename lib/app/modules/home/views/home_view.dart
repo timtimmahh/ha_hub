@@ -18,8 +18,8 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
             body: [
       TimeCard().expanded(flex: 3),
-      GetXFutureView<HomeController, AllWeather?>(
-          rxFuture: controller.allWeatherFuture, builder: (weather) => WeatherCard()).expanded(flex: 4)
+      // GetXFutureView<HomeController, AllWeather?>(
+      //     rxFuture: controller.allWeatherFuture, builder: (weather) => WeatherCard()).expanded(flex: 4)
     ].row(crossAxisAlignment: CrossAxisAlignment.start))
         .contain(padding: EdgeInsets.all(24.0));
   }
