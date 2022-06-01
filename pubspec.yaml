@@ -41,6 +41,9 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
+  assets:
+    - assets/icons/weather/
+    - assets/data/
   fonts:
     - family: Roboto
       fonts:

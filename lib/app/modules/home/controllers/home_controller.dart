@@ -102,20 +102,40 @@ class SunState implements Timer, DateTime {
   int get year => _stateTime.year;
 }
 
+class WeatherForecast {
+  WeatherState _dailyWeather;
+  WeatherState _hourlyWeather;
+
+  WeatherForecast(this._dailyWeather, this._hourlyWeather);
+
+  /*void updateState({WeatherState? dailyWeather, WeatherState? hourlyWeather}) {
+    if (dailyWeather != null && _dailyWeather != dailyWeather) {
+      _dailyWeather = dailyWeather;
+    }
+    if (hourlyWeather != null && _hourlyWeather != hourlyWeather) {
+      _hourlyWeather = hourlyWeather;
+    }
+  }*/
+
+  WeatherState get daily => _dailyWeather;
+  WeatherState get hourly => _hourlyWeather;
+
+}
+
 class HomeController extends GetxController {
   // late final _weatherProvider = Get.find<WeatherProvider>();
   late final _hassIO = Get.find<HassIO>();
   late Config _hassIOConfig;
 
-  // late final allWeatherFuture = Future<AllWeather?>.value().obs;
+  late final weatherForecastFuture = Future<WeatherForecast?>.value().obs;
+
   // late Rx<AllWeather> _allWeather;
   late SunEntityState sunState;
-  late WeatherState dailyWeatherState;
-  late WeatherState hourlyWeatherState;
+  late Rxn<WeatherForecast> weatherForecast = Rxn();
   SunState? _sunCycleTimer;
 
   // SunState? _sunsetState;
-  late final Timer _weatherTimer;
+  // late final Timer _weatherTimer;
   late SharedPreferences preferences;
   late final alarms = List<Alarm>.empty().obs;
 
@@ -129,14 +149,14 @@ class HomeController extends GetxController {
     }), 'localhost', 8123).then((server) {
       print('Serving at ws://${server.address.host}:${server.port}');
     });*/
-    asyncInit().then((value) {
-      // allWeatherFuture.value = Future.value(value);
-      _weatherTimer = Timer.periodic(Duration(minutes: 10), (timer) async {
-        // _allWeather.value = await _weatherProvider.getWeatherData(_hassIOConfig.latitude, _hassIOConfig.longitude);
-        print('Updated weather data');
-        _themeToggleCallback();
-      });
-    });
+    asyncInit(); //.then((value) {
+    // allWeatherFuture.value = Future.value(value);
+    // _weatherTimer = Timer.periodic(Duration(minutes: 10), (timer) async {
+    // _allWeather.value = await _weatherProvider.getWeatherData(_hassIOConfig.latitude, _hassIOConfig.longitude);
+    // print('Updated weather data');
+    // _themeToggleCallback();
+    // });
+    //});
   }
 
   @override
@@ -147,7 +167,7 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     _hassIO.webSocket.close();
-    _weatherTimer.cancel();
+    // _weatherTimer.cancel();
     _sunCycleTimer?.cancel();
     // _sunsetState?.cancel();
     super.onClose();
@@ -156,7 +176,8 @@ class HomeController extends GetxController {
   List<Alarm> get _alarms {
     return (jsonDecode(preferences.getString('alarms') ?? '[]') as List)
         .mapL((it) => Alarm.fromJson(it))
-        .sortByDescending((first, second) => first.nextAlarmTime.compareTo(second.nextAlarmTime));
+        .sortByDescending((first, second) =>
+            first.nextAlarmTime.compareTo(second.nextAlarmTime));
   }
 
   Pair<DateTime, ThemeMode>? _getNextSunCycle() {
@@ -174,22 +195,29 @@ class HomeController extends GetxController {
     return null;
   }
 
-  _makeSunCycleTimer({bool set_initial = false}) {
+  _makeSunCycleTimer({bool setInitial = false}) {
     print('Making sun cycle timer');
     var _sunCycle = _getNextSunCycle();
     if (_sunCycle == null) {
       return;
-    } else if (set_initial) {
-      Get.changeThemeMode(_sunCycle.right == ThemeMode.light ? ThemeMode.dark : ThemeMode.light);
+    } else if (setInitial) {
+      Get.changeThemeMode(_sunCycle.right == ThemeMode.light
+          ? ThemeMode.dark
+          : ThemeMode.light);
     }
     DateTime? nextCycle = _sunCycle.left;
     ThemeMode? mode = _sunCycle.right;
     var now = DateTime.now();
     var timerDuration = nextCycle.difference(now);
     print('Sun cycle occurs in ${timerDuration.format()}');
-    if (_sunCycleTimer != null && _sunCycleTimer!.isActive) {
-      print('Canceling active timer');
-      _sunCycleTimer!.cancel();
+    if (_sunCycleTimer != null) {
+      if (_sunCycleTimer!.isActive) {
+        print('Canceling active timer');
+        _sunCycleTimer!.cancel();
+      }
+      if (nextCycle.isAtSameMomentAs(_sunCycleTimer!._stateTime)) {
+        return;
+      }
     }
     print('Creating new timer');
     var timer = Timer(timerDuration, () {
@@ -206,117 +234,72 @@ class HomeController extends GetxController {
     }
   }
 
-  /*_makeSunriseTimer() {
-    print('Making sunrise timer');
-    if (sunState == null || sunState?.nextRising == null)
-      return;
-    var now = DateTime.now();
-    */ /*var sunriseDate = _allWeather.value.daily!
-        .map<DateTime?>((e) => e.sunrise.isUtc ? e.sunrise.toLocal() : e.sunrise)
-        .firstWhere((sunrise) => sunrise?.isAfter(now) ?? false, orElse: () => null);
-    if (sunriseDate != null && sunriseDate.isAfter(now)) {
-      print('Found next sunrise=${sunriseDate.toIso8601String()}, current=${_sunriseState?.toIso8601String()}');
-      if (_sunriseState != null && sunriseDate.isAtSameMomentAs(_sunriseState!)) {
-        print('No change in sunrise, not creating timer.');
-        return;
-      }*/ /*
-      var sunriseEndDuration = sunState!.nextRising!.difference(now);
-      print('Sunrise occurs in ${sunriseEndDuration.format()}');
-      if (_sunCycleTimer != null && _sunCycleTimer!.isActive) {
-        print('Canceling active timer');
-        _sunCycleTimer!.cancel();
-      }
-      print('Creating new timer');
-      var timer = Timer(sunriseEndDuration, () {
-        print('Sunrise: changed theme mode to light.');
-        Get.changeThemeMode(ThemeMode.light);
-        _makeSunsetTimer();
-      });
-      if (_sunCycleTimer == null) {
-        _sunCycleTimer = SunState(sunState!.nextRising!, timer);
-      } else {
-        _sunCycleTimer!
-          .._stateTime = sunriseDate
-          .._stateTimer = timer;
-      }
-    }
-  }*/
-
-  /*_makeSunsetTimer() {
-    print('Making sunset timer');
-
-    */ /*var now = DateTime.now();
-    var sunsetDate = _allWeather.value.daily!
-        .map<DateTime?>((e) => e.sunset.isUtc ? e.sunset.toLocal() : e.sunset)
-        .firstWhere((sunset) => sunset?.isAfter(now) ?? false, orElse: () => null);
-    if (sunsetDate != null && sunsetDate.isAfter(now)) {
-      print('Found next sunset=${sunsetDate.toIso8601String()}, current=${_sunsetState?.toIso8601String()}');
-      if (_sunsetState != null && sunsetDate.isAtSameMomentAs(_sunsetState!)) {
-        print('No change in sunset, not creating timer.');
-        return;
-      }
-      var sunsetEndDuration = sunsetDate.difference(now);
-      print('Sunset occurs in ${sunsetEndDuration.format()}');
-      if (_sunsetState != null && _sunsetState!.isActive) {
-        print('Canceling active timer');
-        _sunsetState!.cancel();
-      }
-      print('Creating new timer');
-      var timer = Timer(sunsetEndDuration, () {
-        print('Sunset: changed theme mode to dark.');
-        Get.changeThemeMode(ThemeMode.dark);
-        _makeSunsetTimer();
-      });
-      if (_sunsetState == null) {
-        _sunsetState = SunState(sunsetDate, timer);
-      } else {
-        _sunsetState!
-          .._stateTime = sunsetDate
-          .._stateTimer = timer;
-      }
-    }*/ /*
-  }*/
-
   _themeToggleCallback() {
     _makeSunCycleTimer();
   }
 
-  Future<AllWeather> asyncInit() async {
+  void updateSunState(SunEntityState newState, {bool setInitial = false}) {
+    sunState = newState;
+    _makeSunCycleTimer();
+  }
+
+  void updateWeatherState(
+      {WeatherState? dailyWeather, WeatherState? hourlyWeather}) {
+    if (dailyWeather != null) {
+      print(JsonEncoder.withIndent('  ').convert(dailyWeather));
+    }
+    if (hourlyWeather != null) {
+      print(JsonEncoder.withIndent('  ').convert(hourlyWeather));
+    }
+    if (weatherForecast.value != null) {
+      weatherForecast.update((val) {
+        if (dailyWeather != null) {
+          val!._dailyWeather = dailyWeather;
+        }
+        if (hourlyWeather != null) {
+          val!._hourlyWeather = hourlyWeather;
+        }
+      });
+    } else if (dailyWeather != null && hourlyWeather != null) {
+      weatherForecast.value = WeatherForecast(dailyWeather, hourlyWeather);
+      weatherForecastFuture.value = Future.value(weatherForecast.value);
+    }
+  }
+
+  /*Future<WeatherForecast>*/
+  void asyncInit() async {
     preferences = await SharedPreferences.getInstance();
     alarms.value = _alarms;
-    Completer<AllWeather> completer = Completer<AllWeather>();
     _hassIO.webSocket.getConfig((data) async {
       if (data.success) {
         _hassIOConfig = data.result!;
-        // _allWeather = (await _weatherProvider.getWeatherData(_hassIOConfig.latitude, _hassIOConfig.longitude)).obs;
-        var _now = DateTime.now();
-        /*if (_allWeather.value.current!.sunset.isBefore(_now) || _allWeather.value.current!.sunrise.isAfter(_now)) {
-          Get.changeThemeMode(ThemeMode.dark);
-        } else if (_allWeather.value.current!.sunrise.isBefore(_now)) {
-          Get.changeThemeMode(ThemeMode.light);
-        }
-        completer.complete(_allWeather.value);*/
       }
     });
-    // _hassIO.webSocket.subscribeTimeChanges((time) {
-    //   currentTime.value = DateTime.parse(time);
-    // });
-    // var state = await _hassIO.restClient.getEntityState('calendar.timtimmahh_gmail_com');
-    // print(JsonEncoder.withIndent('  ').convert(state));
+
     _hassIO.webSocket.getStates((states) {
       print('Got states');
-
       if (states != null) {
-        sunState = states
-            .firstWhere((element) => element.entityId == 'sun.sun')
-            .let((it) => SunEntityState(it.attributes, it.entityId, it.lastChanged, it.state));
-        _makeSunCycleTimer(set_initial: true);
-        dailyWeatherState = states
-            .firstWhere((element) => element.entityId == 'weather.home')
-            .let((it) => WeatherState(it.attributes, it.entityId, it.lastChanged, it.state));
-        hourlyWeatherState = states
-            .firstWhere((element) => element.entityId == 'weather.home_hourly')
-            .let((it) => WeatherState(it.attributes, it.entityId, it.lastChanged, it.state));
+        updateSunState(
+            states.firstWhere((element) => element.entityId == 'sun.sun').let(
+                (it) => SunEntityState(
+                    it.attributes, it.entityId, it.lastChanged, it.state)),
+            setInitial: true);
+        // _makeSunCycleTimer(set_initial: true);
+        // var dailyWeatherState = ;
+        // var hourlyWeatherState = ;
+        updateWeatherState(
+            dailyWeather: states
+                .firstWhere((element) => element.entityId == 'weather.home')
+                .let((it) => WeatherState(
+                    it.attributes, it.entityId, it.lastChanged, it.state)),
+            hourlyWeather: states
+                .firstWhere(
+                    (element) => element.entityId == 'weather.home_hourly')
+                .let((it) => WeatherState(
+                    it.attributes, it.entityId, it.lastChanged, it.state)));
+        /*weatherForecast =
+            WeatherForecast(dailyWeatherState, hourlyWeatherState).obs;
+        weatherForecastFuture.value = Future.value(weatherForecast.value);*/
       }
       /*print(JsonEncoder.withIndent('  ').convert(states
               ?.where((element) => element.entityId == 'weather.home' || element.entityId == 'weather.home_hourly' || element.entityId == 'sun.sun')
@@ -325,31 +308,34 @@ class HomeController extends GetxController {
     });
     _hassIO.webSocket.subscribeStateChanges('sun.sun', (oldState, newState) {
       print(JsonEncoder.withIndent('  ').convert(newState));
-      SunEntityState _sunState = SunEntityState.fromJson(newState);
+      updateSunState(SunEntityState.fromJson(newState));
     });
-    _hassIO.webSocket.subscribeStateChanges('weather.home', (oldState, newState) {
+    _hassIO.webSocket.subscribeStateChanges('weather.home',
+        (oldState, newState) {
       print('Weather Home');
-      print(JsonEncoder.withIndent(' ').convert(newState));
+      // print(JsonEncoder.withIndent(' ').convert(newState));
       // State _oldState = State.fromJson(oldState);
-      WeatherState _newState = WeatherState.fromJson(newState);
+      // WeatherState _newState = ;
+      updateWeatherState(dailyWeather: WeatherState.fromJson(newState));
     });
-    _hassIO.webSocket.subscribeStateChanges('weather.home_hourly', (oldState, newState) {
+    _hassIO.webSocket.subscribeStateChanges('weather.home_hourly',
+        (oldState, newState) {
       print('Weather Home Hourly');
-      print(JsonEncoder.withIndent('  ').convert(newState));
-      WeatherState _newState = WeatherState.fromJson(newState);
+      // WeatherState _newState = ;
+      updateWeatherState(hourlyWeather: WeatherState.fromJson(newState));
     });
-    return completer.future;
+    // return completer.future;
   }
 
   Config get hassIOConfig => _hassIOConfig;
 
-  // Rx<AllWeather> get allWeather => _allWeather;
+// Rx<AllWeather> get allWeather => _allWeather;
 
-  // CurrentWeather get current => allWeather.value.current!;
+// CurrentWeather get current => allWeather.value.current!;
 
-  // List<HourlyWeather> get hourly => allWeather.value.hourly!;
+// List<HourlyWeather> get hourly => allWeather.value.hourly!;
 
-  // List<DailyWeather> get daily => allWeather.value.daily!;
+// List<DailyWeather> get daily => allWeather.value.daily!;
 
-  // Future<List<WeatherAlerts>> get alerts async => allWeather.value.alerts!;
+// Future<List<WeatherAlerts>> get alerts async => allWeather.value.alerts!;
 }
