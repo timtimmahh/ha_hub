@@ -15,10 +15,16 @@ class TimeCard extends GetView<HomeController> {
                       .format(dateTime)
                       .asText(style: Get.textTheme.headline4)
                       .contain(padding: EdgeInsets.only(bottom: 4.0)),
-                  Get.find<DateFormat>(tag: 'timeFormat')
-                      .format(dateTime)
-                      .asText(style: Get.textTheme.headline2!)
-                      .contain(padding: EdgeInsets.only(top: 4.0))
+                  Text.rich(TextSpan(
+                      text: Get.find<DateFormat>(tag: 'timeFormat').format(dateTime),
+                      style: Get.textTheme.headline2!,
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: Get.find<DateFormat>(tag: 'secondsFormat').format(dateTime),
+                            style: Get.textTheme.headline2?.copyWith(fontSize: Get.textTheme.headline2!.fontSize! / 2.0, fontWeight: FontWeight.bold)),
+                        TextSpan(text: Get.find<DateFormat>(tag: 'daySplitFormat').format(dateTime))
+                      ])).contain(padding: EdgeInsets.only(top: 4.0)),
+                  // Get.find<DateFormat>(tag: 'secondsFormat').format(dateTime).asText(style: Get.textTheme.headline3!)
                 ].linear(crossAxisAlignment: CrossAxisAlignment.start)).expanded(flex: 2),
         // AlarmsCard().expanded(flex: 4),
         Icons.alarm_add.button(onPressed: () {}, iconSize: 36.0).contain().expanded(flex: 1)

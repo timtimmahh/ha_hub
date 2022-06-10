@@ -127,7 +127,7 @@ class HomeController extends GetxController {
   late final _hassIO = Get.find<HassIO>();
   late Config _hassIOConfig;
 
-  late final weatherForecastFuture = Future<WeatherForecast?>.value().obs;
+  // late final weatherForecastFuture = Future<WeatherForecast?>.value().obs;
 
   // late Rx<AllWeather> _allWeather;
   late SunEntityState sunState;
@@ -262,7 +262,7 @@ class HomeController extends GetxController {
       });
     } else if (dailyWeather != null && hourlyWeather != null) {
       weatherForecast.value = WeatherForecast(dailyWeather, hourlyWeather);
-      weatherForecastFuture.value = Future.value(weatherForecast.value);
+      // weatherForecastFuture.value = Future.value(weatherForecast.value);
     }
   }
 

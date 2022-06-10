@@ -14,7 +14,9 @@ class HomeBinding extends Bindings {
     );
     Get.lazyPut<WeatherProvider>(() => WeatherProvider());
     Get.lazyPut<DateFormat>(() => DateFormat('EEE, MMMM d'), tag: 'dateFormat');
-    Get.lazyPut<DateFormat>(() => DateFormat('h:mm:ss a'), tag: 'timeFormat');
+    Get.lazyPut<DateFormat>(() => DateFormat('h:mm'), tag: 'timeFormat');
+    Get.lazyPut<DateFormat>(() => DateFormat(':ss'), tag: 'secondsFormat');
+    Get.lazyPut<DateFormat>(() => DateFormat(' a'), tag: 'daySplitFormat');
     Get.lazyPut<HassIO>(() => HassIO(
         token: hassioToken,
         serverHost: 'condo-homeassistant.duckdns.org',

@@ -20,8 +20,8 @@ class HomeView extends GetView<HomeController> {
       TimeCard().expanded(flex: 3),
       /*GetBuilder(id: 'weather_builder', builder: (controller) => WeatherCard())
           .expanded(flex: 4),*/
-      GetXFutureView<HomeController, WeatherForecast?>(
-          rxFuture: controller.weatherForecastFuture, builder: (weather) => WeatherCard())
+      /*GetXFutureView<HomeController, WeatherForecast?>(
+          rxFuture: controller.weatherForecastFuture, builder: (weather) => */WeatherCard()/*)*/
           .expanded(flex: 4)
     ].row(crossAxisAlignment: CrossAxisAlignment.start))
         .contain(padding: EdgeInsets.all(24.0));

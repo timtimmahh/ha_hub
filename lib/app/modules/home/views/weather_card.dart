@@ -8,13 +8,15 @@ import 'package:intl/intl.dart';
 
 class WeatherCard extends GetView<HomeController> {
   @override
-  Widget build(BuildContext context) => ObxValue<Rxn<WeatherForecast>>(
-      (weather) => weather.value == null
-          ? SizedBox.shrink()
+  Widget build(BuildContext context) => Obx(
+      () => controller.weatherForecast.value == null
+          ? Container(
+          margin: EdgeInsets.all(16.0),
+          child: Center(child: CircularProgressIndicator()))
           : [
               <Widget>[
-                WeatherIcon.fromLegend(weather.value!.daily.state,
-                    DateTime.parse(weather
+                WeatherIcon.fromLegend(controller.weatherForecast.value!.daily.state,
+                    DateTime.parse(controller.weatherForecast
                     .value!.daily.lastChanged)).assetImage
                 /*'https://www.weatherbit.io/static/img/icons/c01d.png'*//*${weather
                 .value
@@ -23,26 +25,26 @@ class WeatherCard extends GetView<HomeController> {
                     .expanded(flex: 1),
                 <Widget>[
                   [
-                    '${weather.value!.daily.temperature!.toPrecision(1)}'
+                    '${controller.weatherForecast.value!.daily.temperature/*.toPrecision(1)*/}'
                         '\u00b0F'
-                        .asText(style: Get.textTheme.headline2!),
+                        .asText(style: Get.textTheme.headline2),
                     hSpace(4.0),
                     [
-                      '${weather.value!.daily.forecast!.first.temperature!
+                      '${controller.weatherForecast.value!.daily.forecast!.first.temperature!
                           /*.toPrecision
                         (1)*/}'
                           '\u00b0F'
-                          .asText(style: Get.textTheme.headline6!),
+                          .asText(style: Get.textTheme.headline6),
                       hSpace(8.0),
-                      '${weather.value!.daily.forecast!.first.templow
+                      '${controller.weatherForecast.value!.daily.forecast!.first.templow
                           /*.toPrecision(1)*/}'
   '\u00b0F'
-                          .asText(style: Get.textTheme.headline6!),
+                          .asText(style: Get.textTheme.headline6),
                     ].column()
                   ]
                       .row(mainAxisAlignment: MainAxisAlignment.start)
                       .contain(padding: EdgeInsets.only(left: 4.0)),
-                  weather.value!.daily.state./*weather!.first.description
+                  controller.weatherForecast.value!.daily.state./*weather!.first.description
                       .*/capitalize!
                       .asText(style: Get.textTheme.headline5)
                       .contain(padding: EdgeInsets.only(left: 4.0)),
@@ -55,12 +57,11 @@ class WeatherCard extends GetView<HomeController> {
               ].row(crossAxisAlignment: CrossAxisAlignment.start),
               vSpace(4.0),
               HourlyWeatherView(
-                weather: weather.value!.hourly,
+                weather: controller.weatherForecast.value!.hourly,
               )
             ]
               .column(mainAxisSize: MainAxisSize.min)
-              .contain(padding: EdgeInsets.all(8.0)) /*)*/,
-      controller.weatherForecast);
+              .contain(padding: EdgeInsets.all(8.0)) /*)*/);
 }
 
 class HourlyWeatherView extends GetView<HomeController> {

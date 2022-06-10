@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'weather_model.dart';
@@ -44,5 +44,5 @@ class WeatherIcon {
 
   String get _assetName => variant == null ? '$key.png' : '${key}_$variant.png';
 
-  Image get assetImage => Image.asset('icons/weather/$_assetName');
+  Image get assetImage => Image.asset('${defaultTargetPlatform == TargetPlatform.linux ? 'assets/' : ''}icons/weather/$_assetName');
 }

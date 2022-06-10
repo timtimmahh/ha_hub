@@ -57,7 +57,7 @@ class ForecastItem {
 }
 
 class WeatherState extends State {
-  double? temperature;
+  int? temperature;
   double? humidity;
   double? pressure;
   double? windBearing;
@@ -68,7 +68,7 @@ class WeatherState extends State {
 
   WeatherState(Map<String, dynamic> attributes, String entityId,
       String lastChanged, String state)
-      : temperature = attributes.getAs<double>('temperature'),
+      : temperature = attributes.getAs<int>('temperature'),
         humidity = attributes.getAs<double>('humidity'),
         pressure = attributes.getAs<double>('pressure'),
         windBearing = attributes.getAs<double>('wind_bearing'),
